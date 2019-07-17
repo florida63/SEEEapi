@@ -18,26 +18,30 @@
 #' @export
 get_indic <- function(indic = NULL, type = NULL) {
 
-  types <- c(beta = "beta-test",
+  types <- c(beta       = "beta-test",
              evaluation = "Outil d'évaluation",
              diagnostic = "Outil de diagnostic")
 
   indicators <- GET(url = "http://seee.eaufrance.fr/api/indicateurs") %>%
-    read_html() %>%
-    html_text() %>%
-    gsub(x = ., pattern = "[", replacement = "", fixed = TRUE) %>%
-    gsub(pattern = "]", replacement = "", fixed =  TRUE) %>%
-    strsplit(split = "},{", fixed = TRUE) %>%
-    '[['(1) %>%
-    gsub(pattern = "{", replacement = "", fixed = TRUE) %>%
-    gsub(pattern = "}", replacement = "", fixed = TRUE) %>%
-    gsub(pattern = "\"", replacement = "") %>%
-    sapply(strsplit, split = ",") %>%
+    read_html()                                                       %>%
+    html_text()                                                       %>%
+    gsub(x = ., pattern = "[", replacement = "", fixed = TRUE)        %>%
+    gsub(pattern = "]", replacement = "", fixed =  TRUE)              %>%
+    strsplit(split = "},{", fixed = TRUE)                             %>%
+    '[['(1)                                                           %>%
+    gsub(pattern = "{", replacement = "", fixed = TRUE)               %>%
+    gsub(pattern = "}", replacement = "", fixed = TRUE)               %>%
+    gsub(pattern = "\"", replacement = "")                            %>%
+    sapply(strsplit, split = ",")                                     %>%
     lapply(function(x) {
-      tibble(Indicator = gsub(x[1], pattern = "indicateur:", replacement = ""),
-             Version = gsub(x[2], pattern = "version:", replacement = ""))
-    }) %>%
-    bind_rows() %>%
+      tibble(Indicator = gsub(x           = x[1],
+                              pattern     = "indicateur:",
+                              replacement = ""),
+             Version = gsub(x           = x[2],
+                            pattern     = "version:",
+                            replacement = ""))
+    })                                                                %>%
+    bind_rows()                                                       %>%
     mutate(ID = seq(n()))
 
   if (!is.null(indic)) {
@@ -50,14 +54,14 @@ get_indic <- function(indic = NULL, type = NULL) {
     group_modify(.f = function(x, ...) {
       GET(paste0("http://seee.eaufrance.fr/api/indicateurs/",
                  x[1], "/", x[2])) %>%
-        content() %>%
+        content()                  %>%
         (function(y) {
           if ("type" %in% names(y)) {
             type <- y$type
           } else {
             type <- NA_character_
           }
-          tibble(Type = type,
+          tibble(Type          = type,
                  `Input files` = length(y$entree))
         })
     }),

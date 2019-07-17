@@ -11,37 +11,38 @@
 #'
 #' @return a list with two elements:
 #'
-#' @importFrom dplyr '%>%' pull bind_cols filter if_else
-#' @importFrom httr POST
+#' @importFrom dplyr '%>%' pull bind_cols filter if_else n as_tibble
+#' @importFrom httr POST upload_file
 #' @importFrom xml2 read_html
 #' @importFrom rvest html_text
 #' @importFrom readr read_delim write_delim
 #' @importFrom purrr map map_lgl map_chr walk
+#' @importFrom stringr str_match
 #'
 #' @export
 calc_indic <- function(indic, version = NULL, file_paths = NULL, data = NULL) {
   find_latest_version <- function(x) {
     x_split <- strsplit(x, split = ".", fixed = TRUE) %>%
-      map(as.numeric) %>%
-      map(as_tibble) %>%
-      bind_cols() %>%
-      t() %>%
-      as.data.frame() %>%
+      map(as.numeric)                                 %>%
+      map(as_tibble)                                  %>%
+      bind_cols()                                     %>%
+      t()                                             %>%
+      as.data.frame()                                 %>%
       (function(df) {
         colnames(df) <- c("major", "minor", "dev")
         df
       })
 
     filter(x_split,
-           major == max(major)) %>%
+           major == max(major))   %>%
       filter(minor == max(minor)) %>%
-      filter(dev == max(dev)) %>%
+      filter(dev   == max(dev))   %>%
       paste(collapse = ".")
   }
 
   if (is.null(version)) {
     version <- get_indic(indic = indic) %>%
-      pull(Version) %>%
+      pull(Version)                     %>%
       find_latest_version()
   }
 
@@ -53,8 +54,7 @@ calc_indic <- function(indic, version = NULL, file_paths = NULL, data = NULL) {
     names(files) <- paste0("file", seq(length(files)))
   } else {
     if (!is.null(data)) {
-      delim <- if_else(grepl("EBio_", indic),
-                       ";", "\t")
+      delim <- if_else(grepl("EBio_", indic), ";", "\t")
 
       if (grepl("data.frame", class(data))) {
         file_paths <- tempfile(fileext = ".txt")
@@ -72,8 +72,8 @@ calc_indic <- function(indic, version = NULL, file_paths = NULL, data = NULL) {
 
           walk(seq(length(file_paths)),
                function(i) {
-                 write_delim(x = data[[i]],
-                             path = file_paths[i],
+                 write_delim(x     = data[[i]],
+                             path  = file_paths[i],
                              delim = delim)
                })
         }
@@ -89,18 +89,50 @@ calc_indic <- function(indic, version = NULL, file_paths = NULL, data = NULL) {
 
   body <- c(body, files)
 
-  POST(url = "http://seee.eaufrance.fr/api/calcul/",
-       body = body,
+  POST(url    = "http://seee.eaufrance.fr/api/calcul/",
+       body   = body,
        encode = "multipart") %>%
-    read_html() %>%
-    html_text() %>%
+    read_html()              %>%
+    html_text()              %>%
     (function(x) {
       if (grepl("Calcul non réalisé", x)) {
         x
       } else {
-        list(info = strsplit(x, split = "\n")[[1]][1] %>%
-               gsub(pattern = ";", replacement = " "),
-             result =  read_delim(x, delim = ";", skip = 1))
+        if (grepl("asynchrone", x)) {
+          id_calcul <- str_match(string  = x,
+                                 pattern = "\\{.*id_calcul\\\":\\\"(.*)\\\"\\}")[,2]
+
+          cat("\nCalcul asynchrone\n")
+
+          res <- "en cours"
+
+          while (grepl(pattern = "en cours", x = res)) {
+            Sys.sleep(5)
+
+            res <- POST(url  = "http://seee.eaufrance.fr/api/resultat/",
+                        body = list(id_calcul = id_calcul)) %>%
+              read_html()                                   %>%
+              html_text()
+
+            cat(".")
+            flush.console()
+          }
+
+          if (grepl("erreur", res)) {
+            res
+          } else {
+            list(info = strsplit(res, split = "\n")[[1]][1] %>%
+                   gsub(pattern = ";", replacement = " "),
+                 result =  read_delim(res, delim = ";", skip = 1))
+
+          }
+
+        } else {
+          list(info = strsplit(x, split = "\n")[[1]][1] %>%
+                 gsub(pattern = ";", replacement = " "),
+               result =  read_delim(x, delim = ";", skip = 1))
+
+        }
       }
     })
 
