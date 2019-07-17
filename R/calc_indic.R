@@ -123,14 +123,16 @@ calc_indic <- function(indic, version = NULL, file_paths = NULL, data = NULL) {
           } else {
             list(info = strsplit(res, split = "\n")[[1]][1] %>%
                    gsub(pattern = ";", replacement = " "),
-                 result =  read_delim(res, delim = ";", skip = 1))
+                 result =  read_delim(res, delim = ";", skip = 1,
+                                      col_type = cols(.default = "c")))
 
           }
 
         } else {
           list(info = strsplit(x, split = "\n")[[1]][1] %>%
                  gsub(pattern = ";", replacement = " "),
-               result =  read_delim(x, delim = ";", skip = 1))
+               result =  read_delim(x, delim = ";", skip = 1,
+                                    col_type = cols(.default = "c")))
 
         }
       }
