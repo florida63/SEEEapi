@@ -8,16 +8,15 @@
 #'   documentation of the indicator
 #' @param data a list of data.frames. Used if file_paths is not provided. The
 #'   order must be the ones described in the documentation of the indicator
+#' @param locally
+#' @param dir_algo
 #'
 #' @return a list with two elements:
 #'
 #' @importFrom dplyr '%>%' pull bind_cols filter if_else n as_tibble
-#' @importFrom httr POST upload_file
-#' @importFrom xml2 read_html
-#' @importFrom rvest html_text
-#' @importFrom readr read_delim write_delim
 #' @importFrom purrr map map_lgl map_chr walk
-#' @importFrom stringr str_match
+#' @importFrom readr write_delim
+#' @importFrom httr upload_file
 #'
 #' @export
 calc_indic <- function(indic, version = NULL, file_paths = NULL, data = NULL,
@@ -28,9 +27,6 @@ calc_indic <- function(indic, version = NULL, file_paths = NULL, data = NULL,
       pull(Version)                     %>%
       find_latest_version()
   }
-
-  body <- list(indicateur = indic,
-               version = version)
 
   if (!is.null(file_paths)) {
     files <- map(file_paths, upload_file)
@@ -70,55 +66,21 @@ calc_indic <- function(indic, version = NULL, file_paths = NULL, data = NULL,
     }
   }
 
-  body <- c(body, files)
+  if (!locally) {
 
-  POST(url    = "http://seee.eaufrance.fr/api/calcul/",
-       body   = body,
-       encode = "multipart") %>%
-    read_html()              %>%
-    html_text()              %>%
-    (function(x) {
-      if (grepl("Calcul non réalisé", x)) {
-        x
-      } else {
-        if (grepl("asynchrone", x)) {
-          id_calcul <- str_match(string  = x,
-                                 pattern = "\\{.*id_calcul\\\":\\\"(.*)\\\"\\}")[,2]
+    run_distant(indic = indic, version = version, files = files)
 
-          cat("\nCalcul asynchrone\n")
+  } else {
+    if (is.null(dir_algo))
+      stop("When locally is set to TRUE, the path of the directory where the algorithms are saved must be given")
 
-          res <- "en cours"
+    if (!file.exists(file.path(dir_algo, indic, version,
+                               paste0(indic, "_v", version, "_calc_consult.r"))))
+      get_algo(indic = indic, version = version, dir_algo = dir_algo, uncompress = TRUE)
 
-          while (grepl(pattern = "en cours", x = res)) {
-            Sys.sleep(5)
+    files <- map_chr(files, .f = function(x) x$path)
 
-            res <- POST(url  = "http://seee.eaufrance.fr/api/resultat/",
-                        body = list(id_calcul = id_calcul)) %>%
-              read_html()                                   %>%
-              html_text()
-
-            cat(".")
-            flush.console()
-          }
-
-          if (grepl("erreur", res)) {
-            res
-          } else {
-            list(info = strsplit(res, split = "\n")[[1]][1] %>%
-                   gsub(pattern = ";", replacement = " "),
-                 result =  read_delim(res, delim = ";", skip = 1,
-                                      col_type = cols(.default = "c")))
-
-          }
-
-        } else {
-          list(info = strsplit(x, split = "\n")[[1]][1] %>%
-                 gsub(pattern = ";", replacement = " "),
-               result =  read_delim(x, delim = ";", skip = 1,
-                                    col_type = cols(.default = "c")))
-
-        }
-      }
-    })
+    run_local(indic = indic, version = version, files = files, dir_algo = dir_algo)
+  }
 
 }
