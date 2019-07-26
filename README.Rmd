@@ -17,37 +17,60 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of SEEEapi is to ...
+The goal of SEEEapi is to provide an easy way to access the indicator calculation services from the [French system for evaluating water status](http://seee.eaufrance.fr/)
 
 ## Installation
 
-You can install the released version of SEEEapi from [CRAN](https://CRAN.R-project.org) with:
+You can install the released version of SEEEapi from [GitHub](https://github.com) with:
 
 ``` r
-install.packages("SEEEapi")
+#install.packages(remotes)
+remotes::intall_github("CedricMondy/SEEEapi)
 ```
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+### List of available indicators
+
+You can list all available indicators :
 
 ```{r example}
 library(SEEEapi)
-## basic example code
+get_indic()
+```
+You can also list only the indicators from a given type:
+
+```{r}
+get_indic(type = "diagnostic")
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
 
-```{r cars}
-summary(cars)
+### Run calculations
+
+The calculations can be executed online on the SEEE server:
+
+```{r, eval=FALSE}
+calc_indic(indic      = "IPR", 
+           version    = "1.0.3", 
+           file_paths = c("IPR_entree_01_env.txt", "IPR_entree_02_faun.txt"))
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
+```{r, echo=FALSE}
+calc_indic(indic = "IPR", 
+           version = "1.0.3", 
+           file_paths = c("dev/IPR_entree_01_env.txt", "dev/IPR_entree_02_faun.txt"))
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub!
+The calculation can also be executed locally by providing a directory where the scripts will be saved (either using `get_algo` or directly by `calc_indic`):
+
+```{r, eval=FALSE}
+calc_indic(indic    = "IPR",
+           version  = NULL,                     # default value, will use the most
+                                                # recent version available
+           data     = list(IPR_entree_01_env, 
+                           IPR_entree_02_faun), # can use data from the environment
+                                                # instead of file paths
+           locally  = TRUE,
+           dir_algo = "algos")
+```
+
