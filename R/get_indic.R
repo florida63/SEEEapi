@@ -11,7 +11,7 @@
 #'
 #' @importFrom httr GET content
 #' @importFrom dplyr '%>%' tibble bind_rows mutate filter select left_join
-#'   group_by group_modify
+#'   group_by
 #' @importFrom xml2 read_html
 #' @importFrom rvest html_text
 #'
@@ -48,10 +48,8 @@ get_indic <- function(indic = NULL, type = NULL) {
     indicators <- filter(indicators, Indicator %in% indic)
   }
 
-  indicators <- left_join(
-    indicators,
-    group_by(indicators, ID) %>%
-    group_modify(.f = function(x, ...) {
+  y <- split(indicators, indicators$ID) %>%
+    lapply(FUN = function(x, ...) {
       GET(paste0("http://seee.eaufrance.fr/api/indicateurs/",
                  x[1], "/", x[2])) %>%
         content()                  %>%
@@ -61,10 +59,16 @@ get_indic <- function(indic = NULL, type = NULL) {
           } else {
             type <- NA_character_
           }
-          tibble(Type          = type,
+          tibble(ID = x$ID,
+                 Type          = type,
                  `Input files` = length(y$entree))
         })
-    }),
+    }) %>%
+    bind_rows()
+
+  indicators <- left_join(
+    indicators,
+    y,
     by = "ID") %>%
     select(-ID)
 
