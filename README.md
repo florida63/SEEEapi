@@ -18,7 +18,7 @@ You can install the released version of SEEEapi from
 
 ``` r
 #install.packages(remotes)
-remotes::intall_github("CedricMondy/SEEEapi)
+remotes::install_github("CedricMondy/SEEEapi)
 ```
 
 ## Example
@@ -33,11 +33,11 @@ get_indic()
 #> # A tibble: 48 x 4
 #>    Type               Indicator       Version `Input files`
 #>    <chr>              <chr>           <chr>           <int>
-#>  1 beta-test          EBio_CE_2015    0.0.990             5
-#>  2 beta-test          EBio_CE_2018    0.0.990             5
-#>  3 beta-test          EBio_CE_Reunion 0.9.990             4
-#>  4 beta-test          EBio_PE_2015    0.0.990             4
-#>  5 beta-test          EBio_PE_2018    0.0.990             4
+#>  1 Outil d'évaluation EBio_CE_2015    1.0.0               5
+#>  2 Outil d'évaluation EBio_CE_2018    1.0.0               5
+#>  3 Outil d'évaluation EBio_CE_Reunion 1.0.0               4
+#>  4 Outil d'évaluation EBio_PE_2015    1.0.0               4
+#>  5 Outil d'évaluation EBio_PE_2018    1.0.0               4
 #>  6 <NA>               I2M2            1.0.2               1
 #>  7 Outil d'évaluation I2M2            1.0.3               1
 #>  8 Outil d'évaluation I2M2            1.0.4               1
@@ -72,7 +72,7 @@ calc_indic(indic      = "IPR",
 ```
 
     #> $info
-    #> [1] "IPR v1.0.3 26/07/2019 Temps d'execution : 3.3secs"
+    #> [1] "IPR v1.0.3 05/10/2019 Temps d'execution : 3.5secs"
     #> 
     #> $result
     #> # A tibble: 900 x 6
@@ -98,9 +98,8 @@ where the scripts will be saved (either using `get_algo` or directly by
 calc_indic(indic    = "IPR",
            version  = NULL,                     # default value, will use the most
                                                 # recent version available
-           data     = list(IPR_entree_01_env, 
-                           IPR_entree_02_faun), # can use data from the environment
-                                                # instead of file paths
+           data     = list(IPR_entree_01_env,   # can use data from the environment
+                           IPR_entree_02_faun), # instead of file paths
            locally  = TRUE,
-           dir_algo = "algos")
+           dir_algo = "my/path/to/algos")
 ```

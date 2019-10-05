@@ -25,7 +25,7 @@ You can install the released version of SEEEapi from [GitHub](https://github.com
 
 ``` r
 #install.packages(remotes)
-remotes::intall_github("CedricMondy/SEEEapi)
+remotes::install_github("CedricMondy/SEEEapi)
 ```
 
 ## Example
@@ -67,10 +67,9 @@ The calculation can also be executed locally by providing a directory where the 
 calc_indic(indic    = "IPR",
            version  = NULL,                     # default value, will use the most
                                                 # recent version available
-           data     = list(IPR_entree_01_env, 
-                           IPR_entree_02_faun), # can use data from the environment
-                                                # instead of file paths
+           data     = list(IPR_entree_01_env,   # can use data from the environment
+                           IPR_entree_02_faun), # instead of file paths
            locally  = TRUE,
-           dir_algo = "algos")
+           dir_algo = "my/path/to/algos")
 ```
 
