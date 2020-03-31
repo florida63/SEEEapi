@@ -1,12 +1,13 @@
 Package: SEEEapi
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Ce package permet de calculer les indicateurs disponibles sur le Système d'Evaluation de l'Etat des Eaux
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Cedric Mondy
+Maintainer: Cedric Mondy <cedric.mondy@ofb.gouv.fr>
+Description: Ce pakage permet de lister et récupérer les algorithmes des indicateurs du SEEE.
+    Il permet également de lancer des calculs directement depuis R, soit en mode distant,
+    en utilisant l'API du SEEE, soit en mode local en utilisant les scripts téléchargés depuis le SEEE.
+License: MIT
 Encoding: UTF-8
 LazyData: true
 Imports: 
@@ -16,4 +17,4 @@ Imports:
     rvest,
     readr,
     purrr
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0

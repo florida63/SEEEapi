@@ -33,12 +33,11 @@ calc_indic <- function(indic, version = NULL, file_paths = NULL, data = NULL,
     names(files) <- paste0("file", seq(length(files)))
   } else {
     if (!is.null(data)) {
-      delim <- if_else(grepl("EBio_", indic), ";", "\t")
 
       if (grepl("data.frame", class(data))) {
         file_paths <- tempfile(fileext = ".txt")
 
-        write_delim(x = data, path = file_paths, delim = delim)
+        write_delim(x = data, path = file_paths, delim = "\t")
 
       } else {
         if (grepl("list", class(data)) &
@@ -46,6 +45,11 @@ calc_indic <- function(indic, version = NULL, file_paths = NULL, data = NULL,
                        function(df) {
                          any(grepl("data.frame", class(df)))
                        }))) {
+          delim = rep("\t" ,length(data))
+
+          if (grepl("Ebio_", indic))
+            delim[-1] <- ";"
+
           file_paths <- map_chr(seq(length(data)),
                                (function(i) tempfile(fileext = ".txt")))
 
@@ -53,7 +57,7 @@ calc_indic <- function(indic, version = NULL, file_paths = NULL, data = NULL,
                function(i) {
                  write_delim(x     = data[[i]],
                              path  = file_paths[i],
-                             delim = delim)
+                             delim = delim[i])
                })
         }
       }

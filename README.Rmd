@@ -13,8 +13,16 @@ knitr::opts_chunk$set(
 )
 ```
 # SEEEapi
+```{r, echo=FALSE}
+version <- as.vector(read.dcf('DESCRIPTION')[, 'Version'])
+version <- gsub('-', '.', version)
+```
 
 <!-- badges: start -->
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+[![Last-changedate](https://img.shields.io/badge/last%20change-`r gsub('-', '--', Sys.Date())`-yellowgreen.svg)](/commits/master)
+[![packageversion](https://img.shields.io/badge/Package%20version-`r version`-orange.svg?style=flat-square)](commits/master)
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/SEEEcreator)](https://cran.r-project.org/package=SEEEcreator)
 <!-- badges: end -->
 
 The goal of SEEEapi is to provide an easy way to access the indicator calculation services from the [French system for evaluating water status](http://seee.eaufrance.fr/)
