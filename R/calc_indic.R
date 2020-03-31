@@ -47,7 +47,7 @@ calc_indic <- function(indic, version = NULL, file_paths = NULL, data = NULL,
                        }))) {
           delim = rep("\t" ,length(data))
 
-          if (grepl("Ebio_", indic))
+          if (grepl("EBio_", indic))
             delim[-1] <- ";"
 
           file_paths <- map_chr(seq(length(data)),
