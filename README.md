@@ -23,7 +23,7 @@ You can install the released version of SEEEapi from
 
 ``` r
 #install.packages(remotes)
-remotes::install_github("CedricMondy/SEEEapi)
+remotes::install_github("CedricMondy/SEEEapi")
 ```
 
 ## Example
