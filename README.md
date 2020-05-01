@@ -51,7 +51,7 @@ get_indic()
 #> # ... with 43 more rows
 ```
 
-You can also list only the indicators from a given type:
+You can also list only the indicators from a given type (2 possibility diagnostic ou evaluation):
 
 ``` r
 get_indic(type = "diagnostic")
